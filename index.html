@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Contributions littoral — Réponses & Photos (avec fallback Drive)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
+  <style>
+    :root{--bg:#0b0c10;--card:#12141a;--text:#e6e8eb;--muted:#a0a7b4;--accent:#4c8bf5;--border:#2a2f3a}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto}
+    .container{max-width:1100px;margin:32px auto;padding:0 16px}
+    h1{font-size:1.8rem;margin:0 0 12px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 16px}
+    input[type="search"]{flex:1;min-width:220px;border:1px solid var(--border);background:#0f1116;color:var(--text);padding:10px 12px;border-radius:10px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+    .entry{display:flex;flex-direction:column;gap:10px}
+    .head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+    .name{font-weight:600}
+    .muted{color:var(--muted)}
+    .tags{display:flex;gap:6px;flex-wrap:wrap}
+    .pill{padding:.2rem .5rem;border:1px solid var(--border);border-radius:999px;font-size:.85rem}
+    .imgs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    .thumb{background:#0f1116;border:1px solid var(--border);border-radius:12px;overflow:hidden;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center}
+    .thumb img, .thumb iframe{width:100%;height:100%;object-fit:cover;display:block;border:0}
+    .err{font-size:.9rem;color:#ffb4b4;text-align:center;padding:8px}
+    a.btn{display:inline-block;padding:8px 12px;border:1px solid var(--border);border-radius:10px;text-decoration:none;color:var(--text)}
+  </style>
+  <script defer>
+    // 👉 Ton CSV publié (output=csv)
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTKqNQZFJBSlHfkAgXd0nVPKYekclkUgBamvmNmNMc5p1_AABAgL7tvNFzlBxk7YpRArtWdXW7GxkzY/pub?gid=1505284384&single=true&output=csv";
+
+    const $ = s => document.querySelector(s);
+    const esc = s => String(s||"").replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const splitLinks = s => String(s||"").split(/[\r\n,;\s]+/).map(x=>x.trim()).filter(Boolean);
+
+    // Récupère l'ID d'un lien Drive (open?id=..., /file/d/ID/view, /d/ID)
+    function driveId(url){
+      if(!url) return "";
+      try{
+        const u = new URL(url.trim());
+        let id = u.searchParams.get("id");
+        if(!id){
+          const m = u.pathname.match(/\/file\/d\/([^/]+)/) || u.pathname.match(/\/d\/([^/]+)/);
+          if(m) id = m[1];
+        }
+        return id || "";
+      }catch{
+        return "";
+      }
+    }
+    const toDirectImg = id => id ? `https://drive.google.com/uc?export=view&id=${id}` : "";
+    const toPreview    = id => id ? `https://drive.google.com/file/d/${id}/preview`    : "";
+
+    async function fetchCSV(url){
+      const res = await fetch(url, {mode:"cors"});
+      if(!res.ok) throw new Error("HTTP "+res.status);
+      const text = await res.text();
+      const parsed = Papa.parse(text, {header:true, skipEmptyLines:true});
+      return parsed.data;
+    }
+
+    // Bloc visuel : on tente <img>, si erreur on remplace par <iframe preview>
+    function imageThumb(rawUrl){
+      const id = driveId(rawUrl);
+      if(!id){
+        return `<div class="err">Lien manquant / dossier<br><small>Besoin d’un lien de <b>fichier</b></small></div>`;
+      }
+      const imgSrc = esc(toDirectImg(id));
+      const prevSrc = esc(toPreview(id));
+      const rawEsc = esc(rawUrl||"");
+      return `
+        <div class="thumb">
+          <img src="${imgSrc}" alt="Photo"
+               referrerpolicy="no-referrer" crossorigin="anonymous"
+               onerror="
+                 this.replaceWith((()=>{
+                   const f=document.createElement('iframe');
+                   f.src='${prevSrc}';
+                   f.allow='fullscreen';
+                   f.referrerPolicy='no-referrer';
+                   f.onload=()=>{};
+                   f.onerror=()=>{ f.replaceWith((()=>{ const d=document.createElement('div'); d.className='err'; d.innerHTML='Image non accessible.<br><small>Vérifie le partage du <b>fichier</b> (toute personne avec le lien)</small><br><a href=${rawEsc} target=_blank>lien brut</a>'; return d; })()); };
+                   return f;
+                 })());
+               ">
+        </div>
+      `;
+    }
+
+    function card(r){
+      const nom = [r["Nom"], r["Prénom"]].filter(Boolean).join(" ") || "—";
+      const email = r["Adresse e-mail"] || "—";
+      const when = r["Horodateur"] || r["Horodatage"] || "—";
+      const secteur = r["Secteur"] || "—";
+      const station = r["Station"] || "—";
+      const desc = r["Description"] || "";
+      const rawImgs = splitLinks(r["Image"]);
+      const thumbs = rawImgs.length ? rawImgs.map(imageThumb).join("") : `<div class="err">Aucune image</div>`;
+
+      return `
+        <article class="card entry">
+          <div class="head">
+            <div>
+              <div class="name">${esc(nom)}</div>
+              <div class="muted">${esc(email)}</div>
+            </div>
+            <div class="tags">
+              <span class="pill">${esc(secteur)}</span>
+              <span class="pill">${esc(station)}</span>
+            </div>
+          </div>
+          ${desc ? `<div>${esc(desc)}</div>` : ``}
+          <div class="imgs">${thumbs}</div>
+          <div class="muted">Soumis : ${esc(when)}</div>
+        </article>
+      `;
+    }
+
+    function filterRows(rows, q){
+      if(!q) return rows;
+      const k = q.toLowerCase();
+      return rows.filter(r =>
+        [r["Nom"], r["Prénom"], r["Description"], r["Secteur"], r["Station"], r["Adresse e-mail"]]
+          .filter(Boolean).join(" ").toLowerCase().includes(k)
+      );
+    }
+
+    let ALL = [];
+    async function main(){
+      try{
+        if(!CSV_URL){ $("#error").textContent = "⚠️ CSV_URL manquant."; return; }
+        ALL = await fetchCSV(CSV_URL);
+        render(ALL);
+        $("#q").addEventListener("input", () => render(filterRows(ALL, $("#q").value)));
+      }catch(e){
+        console.error(e);
+        $("#error").textContent = "❌ Erreur de chargement. Vérifie l’URL CSV et le partage Drive.";
+      }
+    }
+
+    function render(rows){
+      $("#count").textContent = rows.length;
+      $("#list").innerHTML = rows.map(card).join("") || '<div class="card">Aucune réponse</div>';
+    }
+
+    document.addEventListener("DOMContentLoaded", main);
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Contributions littoral — Réponses & Photos</h1>
+  </div>
+  <div class="container">
+    <div class="controls">
+      <input id="q" type="search" placeholder="Rechercher (nom, secteur, station, description)…">
+    </div>
+    <p id="error" class="card" style="display:none"></p>
+    <div id="list" class="grid"></div>
+    <p class="muted" style="margin-top:8px"><span id="count">0</span> réponse(s)</p>
+
+    
+  </div>
+</body>
+</html>
