@@ -43,7 +43,7 @@ Le projet illustre une approche **hypermédia**, car il relie différents types 
 Ces éléments multimédias sont interconnectés et consultables par navigation interactive, démontrant la **dimension hypermédia** du projet.
 
 
-## 🧩 Diagramme entité–relation
+##  Diagramme entité–relation
 
 ```mermaid
 erDiagram
