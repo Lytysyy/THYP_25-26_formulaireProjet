@@ -43,6 +43,51 @@ Le projet illustre une approche **hypermédia**, car il relie différents types 
 Ces éléments multimédias sont interconnectés et consultables par navigation interactive, démontrant la **dimension hypermédia** du projet.
 
 
+## 🧩 Diagramme entité–relation
+
+```mermaid
+erDiagram
+  USER {
+    int id
+    varchar nom
+    varchar prenom
+    varchar email
+    datetime created_at "date d'entrée"
+  }
+
+  SECTOR {
+    int id
+    varchar code
+    varchar name
+  }
+
+  PHOTO {
+    int id
+    int user_id
+    int sector_id
+    varchar file_path
+    varchar location_name
+    decimal latitude
+    decimal longitude
+    datetime date_taken
+    datetime uploaded_at
+  }
+
+  OBSERVATION {
+    int id
+    int photo_id
+    decimal hauteur_eau "hauteur d'eau en mètres"
+    varchar unite
+    text commentaire
+    datetime created_at
+  }
+
+  USER ||--o{ PHOTO : "envoie"
+  SECTOR ||--o{ PHOTO : "localise"
+  PHOTO ||--o{ OBSERVATION : "associe une mesure"
+
+
+
 
 
 
