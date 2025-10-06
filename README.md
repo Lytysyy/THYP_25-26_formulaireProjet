@@ -1,6 +1,6 @@
- Plateforme hypermédia participative de suivi du littoral
+Plateforme hypermédia participative de suivi du littoral
  
- Ce projet a pour objectif de créer une plateforme web hypermédia inspirée du programme CoastSnap, permettant le suivi participatif du littoralbà partir de **photos géolocalisées** envoyées par les utilisateurs.
+Ce projet a pour objectif de créer une plateforme web hypermédia inspirée du programme CoastSnap, permettant le suivi participatif du littoralbà partir de **photos géolocalisées** envoyées par les utilisateurs.
 
 Les citoyens peuvent déposer des **images** prises depuis des points fixes sur la côte. Ces photos sont associées à des **métadonnées** (date, lieu, auteur, coordonnées GPS) et sont **enregistrées dans une base de données**.  
 Elles sont ensuite **affichées sur une carte interactive** grâce à **Leaflet.js** et **OpenStreetMap**, permettant d’observer visuellement l’évolution des sites côtiers dans le temps.
@@ -41,3 +41,11 @@ Le projet illustre une approche **hypermédia**, car il relie différents types 
 - **Médias combinés** : texte, image, géolocalisation et données.  
 
 Ces éléments multimédias sont interconnectés et consultables par navigation interactive, démontrant la **dimension hypermédia** du projet.
+
+
+
+
+
+
+
+
