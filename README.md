@@ -48,16 +48,16 @@ Ces éléments multimédias sont interconnectés et consultables par navigation 
 erDiagram
   USER {
     int id
-    varchar nom
-    varchar prenom
+    string nom
+    string prenom
     varchar email
-    datetime created_at "date d'entrée"
+    datetime cree_en "date d'entrée"
   }
 
   SECTOR {
     int id
     varchar code
-    varchar name
+    string name
   }
 
   PHOTO {
@@ -65,7 +65,7 @@ erDiagram
     int user_id
     int sector_id
     varchar file_path
-    varchar location_name
+    varchar location_nom
     decimal latitude
     decimal longitude
     datetime date_taken
