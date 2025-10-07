@@ -27,10 +27,9 @@ Le projet illustre une approche **hypermédia**, car il relie différents types 
 
 ##  Technologies utilisées
 - **PHP / MySQL** : gestion des utilisateurs, stockage et traitement des données.  
-- **JavaScript ** : interactions et affichage dynamique.  
-- **Leaflet.js + OpenStreetMap** : création de la **carte interactive**.  
+- **JavaScript ** : interactions et affichage dynamique.    
 - **JSON / RDF ** : échanges de données et représentation sémantique.  
-- **HTML5 / CSS3 / Markdown** : structure, design et documentation.  
+- **HTML5 / CSS3 ** : structure, design et documentation.  
 - **Mermaid** : création du diagramme entité–relation (ER).  
 
 ##  Données et multimédia
