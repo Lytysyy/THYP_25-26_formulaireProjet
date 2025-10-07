@@ -66,8 +66,6 @@ erDiagram
     int sector_id
     varchar file_path
     varchar location_nom
-    decimal latitude
-    decimal longitude
     datetime date_taken
     datetime uploaded_at
   }
@@ -76,7 +74,6 @@ erDiagram
     int id
     int photo_id
     decimal hauteur_eau "hauteur d'eau en mètres"
-    varchar unite
     text commentaire
     datetime created_at
   }
